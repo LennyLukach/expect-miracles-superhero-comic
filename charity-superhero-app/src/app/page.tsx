@@ -28,16 +28,21 @@ export default function Home() {
     setError(null);
     const f = e.target.files?.[0] ?? null;
     setFile(f);
-    if (f) setPreview(URL.createObjectURL(f));
-    else setPreview(null);
+    setPreview(f ? URL.createObjectURL(f) : null);
   }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setResultUrl(null);
-    if (!file) return setError("Please upload a clear photo of the person.");
-    if (!firstName.trim()) return setError("First name is required.");
+    if (!file) {
+      setError("Please upload a clear photo of the person.");
+      return;
+    }
+    if (!firstName.trim()) {
+      setError("First name is required.");
+      return;
+    }
     setLoading(true);
     try {
       const fd = new FormData();
@@ -47,10 +52,14 @@ export default function Home() {
 
       const resp = await fetch("/api/generate", { method: "POST", body: fd });
       const json = (await resp.json()) as GenResponse;
-      if (!resp.ok) throw new Error(json.error || "Image generation failed.");
-      setResultUrl(json.imageUrl!);
-    } catch (err: any) {
-      setError(err?.message ?? "Unexpected error");
+      if (!resp.ok || !json.imageUrl) {
+        throw new Error(json.error || "Image generation failed.");
+      }
+      setResultUrl(json.imageUrl);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : typeof err === "string" ? err : "Unexpected error";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -90,7 +99,7 @@ export default function Home() {
                 type="file"
                 accept="image/*"
                 onChange={onPick}
-                className="block w-full rounded border-2 border-black bg-white p-3 text-sm font-semibold text-black L:text-black/60"
+                className="block w-full rounded border-2 border-black bg-white p-3 text-sm font-semibold text-black placeholder:text-black/60"
                 required
               />
               {file && (
@@ -129,7 +138,8 @@ export default function Home() {
                 <input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1 w-full rounded border-2 border-black bg-[#fff1b3] p-3 text-base font-bold text-black L:text-black/60 outline-none focus:ring-2 focus:ring-[#f5c042]"
+                  placeholder="e.g., Alex"
+                  className="mt-1 w-full rounded border-2 border-black bg-[#fff1b3] p-3 text-base font-bold text-black placeholder:text-black/60 outline-none focus:ring-2 focus:ring-[#f5c042]"
                   required
                 />
               </div>
@@ -140,7 +150,8 @@ export default function Home() {
                 <input
                   value={accessories}
                   onChange={(e) => setAccessories(e.target.value)}
-                  className="mt-1 w-full rounded border-2 border-black bg-[#cfe2ff] p-3 text-base font-bold text-black L:text-black/60 outline-none focus:ring-2 focus:ring-[#6da7ff]"
+                  placeholder="e.g., shield, utility belt, cosmic gauntlet"
+                  className="mt-1 w-full rounded border-2 border-black bg-[#cfe2ff] p-3 text-base font-bold text-black placeholder:text-black/60 outline-none focus:ring-2 focus:ring-[#6da7ff]"
                 />
               </div>
 

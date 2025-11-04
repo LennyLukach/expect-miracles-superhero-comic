@@ -1,6 +1,7 @@
 // src/app/api/generate/route.ts
 import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
+import type { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -44,10 +45,10 @@ Tone: Heroic, motivational, nostalgic — as if it’s a collectible Golden Age 
   return prompt;
 }
 
-type OpenAIImageResp = {
-  data?: Array<{ url?: string; b64_json?: string }>;
-  error?: { message?: string; code?: string };
-};
+type OpenAIImageData = { url?: string; b64_json?: string };
+type OpenAIImageResp =
+  | { data: OpenAIImageData[]; error?: undefined }
+  | { data?: undefined; error: { message?: string; code?: string } };
 
 export async function POST(req: Request) {
   try {
@@ -72,10 +73,10 @@ export async function POST(req: Request) {
     const prompt = buildPrompt(firstName, accessories || undefined);
 
     // Build form-data for OpenAI image edits.
-    // Use `image[]` per API to condition on the uploaded photo.
+    // Use `image[]` to condition on the uploaded photo.
     const openaiForm = new FormData();
     const imageName =
-      (photo as any)?.name || "photo.png"; // Blob may not have a name; that's OK
+      photo instanceof File && photo.name ? photo.name : "photo.png";
     openaiForm.append("image[]", photo, imageName);
     openaiForm.append("prompt", prompt);
     openaiForm.append("size", "1024x1024");
@@ -91,12 +92,23 @@ export async function POST(req: Request) {
 
     if (!resp.ok) {
       const errText = await resp.text();
-      return NextResponse.json({ error: `OpenAI error: ${errText}` }, { status: 500 });
+      return NextResponse.json(
+        { error: `OpenAI error: ${errText}` },
+        { status: 500 }
+      );
     }
+
     const json = (await resp.json()) as OpenAIImageResp;
-    const b64 = json?.data?.[0]?.b64_json;
+    const b64 =
+      json && "data" in json && Array.isArray(json.data)
+        ? json.data[0]?.b64_json
+        : undefined;
+
     if (!b64) {
-      return NextResponse.json({ error: "No image returned from OpenAI." }, { status: 500 });
+      return NextResponse.json(
+        { error: "No image returned from OpenAI." },
+        { status: 500 }
+      );
     }
 
     const buffer = Buffer.from(b64, "base64");
@@ -105,9 +117,14 @@ export async function POST(req: Request) {
     const secureUrl: string = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: "charity-superhero", resource_type: "image", format: "png" },
-        (err, result) => {
-          if (err || !result?.secure_url)
-            return reject(err || new Error("Cloudinary upload failed"));
+        (
+          err: UploadApiErrorResponse | undefined,
+          result: UploadApiResponse | undefined
+        ) => {
+          if (err || !result?.secure_url) {
+            reject(err ?? new Error("Cloudinary upload failed"));
+            return;
+          }
           resolve(result.secure_url);
         }
       );
@@ -115,10 +132,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ imageUrl: secureUrl });
-  } catch (e: any) {
-    return NextResponse.json(
-      { error: e?.message ?? "Unexpected server error" },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    const message =
+      e instanceof Error ? e.message : typeof e === "string" ? e : "Error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
