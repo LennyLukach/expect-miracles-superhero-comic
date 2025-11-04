@@ -138,7 +138,6 @@ export default function Home() {
                 <input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="e.g., Alex"
                   className="mt-1 w-full rounded border-2 border-black bg-[#fff1b3] p-3 text-base font-bold text-black placeholder:text-black/60 outline-none focus:ring-2 focus:ring-[#f5c042]"
                   required
                 />
@@ -150,7 +149,6 @@ export default function Home() {
                 <input
                   value={accessories}
                   onChange={(e) => setAccessories(e.target.value)}
-                  placeholder="e.g., shield, utility belt, cosmic gauntlet"
                   className="mt-1 w-full rounded border-2 border-black bg-[#cfe2ff] p-3 text-base font-bold text-black placeholder:text-black/60 outline-none focus:ring-2 focus:ring-[#6da7ff]"
                 />
               </div>
