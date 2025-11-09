@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 
 /** Brand colors */
@@ -36,6 +36,9 @@ export default function Home() {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  /** NEW: ref to the result section so we can scroll to it */
+  const resultRef = useRef<HTMLDivElement | null>(null);
 
   function handlePickedFile(e: React.ChangeEvent<HTMLInputElement>) {
     setResultUrl(null);
@@ -98,6 +101,20 @@ export default function Home() {
 
   const withVars = (obj: Record<string, string | number>) =>
     obj as React.CSSProperties;
+
+  /** NEW: when a result URL appears, auto-scroll the result into view */
+  useEffect(() => {
+    if (resultUrl && resultRef.current) {
+      // Give the DOM a tick to paint before scrolling (helps iOS Safari)
+      requestAnimationFrame(() => {
+        // Extra tiny delay so the container size is finalized
+        setTimeout(() => {
+          // Prefer smooth native scroll
+          resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 50);
+      });
+    }
+  }, [resultUrl]);
 
   return (
     <main
@@ -329,37 +346,39 @@ export default function Home() {
 
         {/* Result */}
         {resultUrl && (
-          <ComicCard>
-            <div className="flex flex-col gap-3">
-              <div
-                className="relative w-full h-[85vh] sm:h-[90vh] md:h-[92vh] overflow-hidden rounded-xl border-2"
-                style={{ backgroundColor: WHITE, borderColor: DEEP_BLUE }}
-              >
-                <Image
-                  src={resultUrl}
-                  alt="Generated Comic Cover"
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, 768px"
-                />
-              </div>
+          <div ref={resultRef} style={{ scrollMarginTop: "16px" }}>
+            <ComicCard>
+              <div className="flex flex-col gap-3">
+                <div
+                  className="relative w-full h-[85vh] sm:h-[90vh] md:h-[92vh] overflow-hidden rounded-xl border-2"
+                  style={{ backgroundColor: WHITE, borderColor: DEEP_BLUE }}
+                >
+                  <Image
+                    src={resultUrl}
+                    alt="Generated Comic Cover"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 768px"
+                  />
+                </div>
 
-              <a
-                href={resultUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-1 inline-flex items-center justify-center rounded-lg border-4 px-5 py-3 text-base font-black"
-                style={{
-                  backgroundColor: WHITE,
-                  color: DEEP_BLUE,
-                  borderColor: DEEP_BLUE,
-                  boxShadow: `4px 4px 0 0 ${DEEP_BLUE}`,
-                }}
-              >
-                Open Full Image
-              </a>
-            </div>
-          </ComicCard>
+                <a
+                  href={resultUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-flex items-center justify-center rounded-lg border-4 px-5 py-3 text-base font-black"
+                  style={{
+                    backgroundColor: WHITE,
+                    color: DEEP_BLUE,
+                    borderColor: DEEP_BLUE,
+                    boxShadow: `4px 4px 0 0 ${DEEP_BLUE}`,
+                  }}
+                >
+                  Open Full Image
+                </a>
+              </div>
+            </ComicCard>
+          </div>
         )}
       </div>
     </main>
