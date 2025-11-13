@@ -36,8 +36,6 @@ export default function Home() {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  /** NEW: ref to the result section so we can scroll to it */
   const resultRef = useRef<HTMLDivElement | null>(null);
 
   function handlePickedFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -99,17 +97,31 @@ export default function Home() {
     }
   }
 
+  /** Open LinkedIn app with web fallback */
+  function handleOpenLinkedIn() {
+    const deepLink = "linkedin://";
+    const webUrl = "https://www.linkedin.com/";
+    try {
+      const started = Date.now();
+      window.location.href = deepLink;
+      setTimeout(() => {
+        if (Date.now() - started < 1600) {
+          window.location.href = webUrl;
+        }
+      }, 800);
+    } catch {
+      window.location.href = webUrl;
+    }
+  }
+
   const withVars = (obj: Record<string, string | number>) =>
     obj as React.CSSProperties;
 
-  /** NEW: when a result URL appears, auto-scroll the result into view */
+  /** When a result URL appears, auto-scroll the result into view */
   useEffect(() => {
     if (resultUrl && resultRef.current) {
-      // Give the DOM a tick to paint before scrolling (helps iOS Safari)
       requestAnimationFrame(() => {
-        // Extra tiny delay so the container size is finalized
         setTimeout(() => {
-          // Prefer smooth native scroll
           resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 50);
       });
@@ -362,20 +374,26 @@ export default function Home() {
                   />
                 </div>
 
-                <a
-                  href={resultUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 inline-flex items-center justify-center rounded-lg border-4 px-5 py-3 text-base font-black"
+                <p
+                  className="text-xs sm:text-sm font-semibold text-center"
+                  style={{ color: "#444" }}
+                >
+                  Long press the image to save it to your camera roll
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleOpenLinkedIn}
+                  className="inline-flex items-center justify-center rounded-lg border-4 px-5 py-3 text-base font-black"
                   style={{
-                    backgroundColor: WHITE,
-                    color: DEEP_BLUE,
+                    backgroundColor: PURPLE,
+                    color: WHITE,
                     borderColor: DEEP_BLUE,
                     boxShadow: `4px 4px 0 0 ${DEEP_BLUE}`,
                   }}
                 >
-                  Open Full Image
-                </a>
+                  Share to LinkedIn
+                </button>
               </div>
             </ComicCard>
           </div>
