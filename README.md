@@ -1,8 +1,8 @@
 # Expect Miracles – Superhero Comic App
 
-This project is a full‑stack web app built for a live fundraising event supporting *Expect Miracles*, a cancer charity. The idea was simple: let people take a selfie, add a few details, and get back a comic‑book‑style superhero version of themselves.
+This project is a full‑stack web app built for a live fundraising event supporting *Expect Miracles*, a cancer charity. The idea is simple: let people take a selfie, add a few details, and get back a comic book style superhero version of themselves.
 
-The app was designed for real people in a real event setting—non‑technical users, phones in hand, lots of traffic, and no patience for confusing UI. Everything about it is geared toward being fast, clear, and fun while still being reliable and safe in a public environment.
+The app was designed for real people in a real event setting for people with their phones in hand, lots of traffic, and no patience for confusing UI. Everything about it is geared toward being fast, clear, and fun while still being reliable in a public environment.
 
 ---
 
@@ -11,7 +11,7 @@ The app was designed for real people in a real event setting—non‑technical u
 * Lets users upload a selfie
 * Collects a few optional details (name, accessories)
 * Generates a personalized superhero image
-* Returns a comic‑style portrait in seconds
+* Returns a comic style portrait in seconds
 * Works smoothly on mobile and desktop
 * Stores and serves images from the cloud
 
@@ -50,8 +50,6 @@ The app was designed for real people in a real event setting—non‑technical u
 4. The generated image is uploaded to Cloudinary.
 5. The final image is sent back and shown to the user.
 
-The flow is built to handle real‑world issues—slow responses, failed requests, and users who don’t read instructions—without breaking the experience.
-
 ---
 
 ## Running It Locally
@@ -79,21 +77,19 @@ CLOUDINARY_API_KEY=your_cloudinary_key
 CLOUDINARY_API_SECRET=your_cloudinary_secret
 ```
 
-`.env.local` is ignored by git. Do not commit secrets.
-
 ### Start the App
 
 ```bash
 npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Then open the localhost link for the site.
 
 ---
 
 ## Deployment
 
-The app is set up to deploy cleanly on platforms like Vercel:
+The app is set up to deploy cleanly on Vercel:
 
 1. Push the repo to GitHub
 2. Connect it to Vercel
@@ -104,7 +100,6 @@ The app is set up to deploy cleanly on platforms like Vercel:
 
 ## Privacy & Safety
 
-* No API keys or secrets are stored in the repo
 * User images are processed only to generate the result
 * No personal data is stored beyond what’s needed
 * Prompts are written to keep results appropriate for a public event
@@ -113,10 +108,4 @@ The app is set up to deploy cleanly on platforms like Vercel:
 
 ## Why This Exists
 
-This was built for a real fundraising event for *Expect Miracles*. The goal wasn’t just to show off AI—it was to give people something memorable and fun while supporting a good cause.
-
-It’s also a portfolio project that reflects real product constraints: live users, performance limits, unclear requirements, and the need for something that just works.
-
----
-
-Built to support Expect Miracles and to show what practical, user‑focused AI apps can look like.
+This was built for a real fundraising event for *Expect Miracles*. The goal wasn’t just to show off AI. it was to give people something memorable and fun while supporting a good cause.
